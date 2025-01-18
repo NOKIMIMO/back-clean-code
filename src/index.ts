@@ -1,14 +1,18 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response } from "express";
 
-const app = express();
-const port = 3000;
+import { routes } from "./api/routes/routes";
 
-app.use(express.json());
+const main = async () => {
+  const app = express();
+  const port = 3000;
 
-app.get('/', (req: Request, res: Response) => {
-    res.send('Bienvenue sur votre API TypeScript !');
-});
+  app.use(express.json());
 
-app.listen(port, () => {
+  routes(app);
+
+  app.listen(port, () => {
     console.log(`Serveur démarré sur http://localhost:${port}`);
-});
+  });
+};
+
+main();
