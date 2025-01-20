@@ -1,11 +1,16 @@
+import { Card } from "../type/card.type";
+
 export class LearningService {
 
     constructor() {}
 
-    static getTodayQuizz():void {
-
+    static getTodayQuizz(date: Date): Card[] {
+        const cards: Card[] = [];
+        return cards;
     }
-    static answerCard():void {
-        
+
+    static answerCard(id: String, isValid: object): Object {
+        // Une fonction qui transforme le bool en requestBody
+        //TODO
     }
 } 

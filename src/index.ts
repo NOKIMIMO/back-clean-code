@@ -1,9 +1,9 @@
 import express, { Request, Response } from "express";
-
 import { routes } from "./api/routes/routes";
 
+const app = express();
+
 const main = async () => {
-  const app = express();
   const port = 3000;
 
   app.use(express.json());
@@ -14,5 +14,7 @@ const main = async () => {
     console.log(`Serveur démarré sur http://localhost:${port}`);
   });
 };
+
+export { app };
 
 main();

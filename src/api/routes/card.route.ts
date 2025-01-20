@@ -1,15 +1,17 @@
-import { Router } from "express"; // Importation du routeur d'Express
-import { createCards, getAllCards } from "../controller/card.controller";
+import { Router } from "express";
+import { createCardRequest, getAllCards } from "../controller/card.controller";
 import { getTodayQuizz, answerCard } from "../controller/learning.controller";
-
-const router = Router(); // Création du routeur
+import { validatorMiddleware } from "../middleware/body-validator.middleware";
+import { createCardBodyValidator } from "../validators/card.validator"
+import { answerQuizzBodyValidator, answerQuizzParamValidator, getQuizzOfDateQuerryValidator } from "../validators/learning.validator";
+const router = Router(); 
 
 router.get("/", getAllCards);
 
-router.post("/", createCards);
+router.post("/",validatorMiddleware({body: createCardBodyValidator}),createCardRequest);
 
-router.get("/quizz", getTodayQuizz);
+router.get("/quizz", validatorMiddleware({query: getQuizzOfDateQuerryValidator}), getTodayQuizz);
 
-router.patch("/:idCard/answer", answerCard);
+router.patch("/:idCard/answer", validatorMiddleware({params: answerQuizzBodyValidator, body: answerQuizzParamValidator}), answerCard);
 
-export default router; // Exportation du routeur
+export default router; 
