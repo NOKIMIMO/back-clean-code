@@ -1,30 +1,26 @@
-import { Card } from "../../domain/type/card.type";
 import { Request, Response } from "express";
-import { database } from "../../infrastructure/database";
-import { Repository } from "typeorm";
 import { CardService } from "../../domain/service/card.service";
-import { CreateCardRequest } from "../dto/card.dto";
 
+export class CardController {
+  constructor(private cardService: CardService) {}
 
-
-export const getAllCards = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  
-};
-
-
-export const createCardRequest = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  try{
-    const card: CreateCardRequest = req.body;
-    const createdCard = await CardService.createCard(card);
-    res.status(201).json(createdCard);
-  }catch(error){
-    console.error(error);
-    res.status(400).json({ error: "Bad request" });
+  async getAllCards(req: Request, res: Response): Promise<void> {
+    try {
+      const cards = await this.cardService.getAllCards(req.body);
+      res.status(200).json(cards);
+    } catch (error) {
+      console.error(error);
+      res.status(400).json({ error: "Bad request" });
+    }
   }
-};
+
+  async createCardRequest(req: Request, res: Response): Promise<void> {
+    try {
+      const createdCard = await this.cardService.createCard(req.body);
+      res.status(201).json(createdCard);
+    } catch (error) {
+      console.error(error);
+      res.status(400).json({ error: "Bad request" });
+    }
+  }
+}

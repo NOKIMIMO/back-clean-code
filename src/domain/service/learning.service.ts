@@ -4,13 +4,14 @@ export class LearningService {
 
     constructor() {}
 
-    static getTodayQuizz(date: Date): Card[] {
+    async getTodayQuizz(date: Date): Promise<Card[]> {
         const cards: Card[] = [];
         return cards;
     }
 
-    static answerCard(id: String, isValid: object): Object {
+    async answerCard(id: String, isValid: object): Promise<boolean> {
         // Une fonction qui transforme le bool en requestBody
         //TODO
+        return true;
     }
 } 

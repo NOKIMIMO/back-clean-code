@@ -1,19 +1,18 @@
-import { CreateCardRequest } from "../../api/dto/card.dto";
+import { CreateCardRequest, ListCardRequest } from "../../api/dto/card.dto";
 import { Card } from "../type/card.type";
+import { CardRepository } from "../../infrastructure/repository/card.repository";
 
 
 export class CardService {
-    constructor() {}
+    constructor(private cardRepository: CardRepository) {}
 
-    static getAllCards(): Card[] {
-        // TODO : get all cards
-        // Return type : Card[]
+    async getAllCards(request:ListCardRequest): Promise<Card[]> {
+        return await this.cardRepository.listCards(request);
+
     }
 
-    static createCard(card: CreateCardRequest): Card {
-        // TODO : create card 
-        // Return type : Card
-
+    async createCard(card: CreateCardRequest): Promise<Card> {
+        return await this.cardRepository.createCard(card);
     }
 
 }
