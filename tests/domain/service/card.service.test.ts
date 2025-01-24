@@ -1,68 +1,53 @@
 import { CardService } from "../../../src/domain/service/card.service";
-import { CreateCardRequest } from "../../../src/api/dto/card.dto";
+import { CreateCardRequest, ListCardRequest } from "../../../src/api/dto/card.dto";
 import { Card } from "../../../src/domain/type/card.type";
 import { Category } from "../../../src/domain/type/category.type";
-
-jest.mock("../../../src/domain/service/card.service");
+import { CardRepository } from "../../../src/infrastructure/repository/card.repository";
 
 describe("CardService", () => {
-  it("should create a card successfully", async () => {
-    const mockCard: Card = {
-      id: "1",
-      question: "string",
-      answer: "string",
-      tag: "string",
-      category: Category.DONE
-    };
-    (CardService.createCard as jest.Mock).mockResolvedValue(mockCard);
+  let cardService: CardService;
+  let cardRepository: jest.Mocked<CardRepository>;
 
-    const card: CreateCardRequest = {
+  beforeEach(() => {
+    cardRepository = {
+      createCard: jest.fn(),
+      listCards: jest.fn(),
+    } as unknown as jest.Mocked<CardRepository>;
+
+    cardService = new CardService(cardRepository);
+  });
+
+  it("should create a card successfully", async () => {
+
+    const cardRequest: CreateCardRequest = {
       question: "What is Jest?",
       answer: "A testing framework for JavaScript",
       tag: "testing",
     };
 
-    const result = await CardService.createCard(card);
+    const mockCard = {
+      id: "1",
+      question: cardRequest.question,
+      answer: cardRequest.answer,
+      tag: cardRequest.tag || "",
+      category: Category.FIRST
+    };
+
+    cardRepository.createCard.mockResolvedValue({...mockCard});
+
+    const result = await cardService.createCard(cardRequest);
 
     expect(result).toBeDefined();
     expect(result).toHaveProperty("id");
-    expect(result.question).toBe(card.question);
-    expect(result.answer).toBe(card.answer);
-    expect(result.tag).toBe(card.tag);
-  });
+    expect(result.question).toBe(cardRequest.question);
+    expect(result.answer).toBe(cardRequest.answer);
+    expect(result.tag).toBe(cardRequest.tag);
 
-  it("should return all cards", async () => {
-    const mockCards: Card[] = [
-      {
-        id: "1",
-        question: "What is Jest?",
-        answer: "A testing framework for JavaScript",
-        tag: "testing",
-        category: Category.FIRST
-      },
-      {
-        id: "2",
-        question: "What is TypeScript?",
-        answer: "A strongly typed superset of JavaScript",
-        tag: "typescript",
-        category: Category.SECOND
-      },
-    ];
-    (CardService.getAllCards as jest.Mock).mockResolvedValue(mockCards);
-
-    const result = await CardService.getAllCards();
-
-    expect(result).toBeDefined();
-    expect(Array.isArray(result)).toBe(true);
-    expect(result).toHaveLength(mockCards.length);
-    result.forEach((card, index) => {
-      expect(card).toMatchObject(mockCards[index]);
-    });
+    expect(cardRepository.createCard).toHaveBeenCalledWith(cardRequest);
   });
 
   it("should handle createCard errors", async () => {
     const errorMessage = "Invalid input";
-    (CardService.createCard as jest.Mock).mockRejectedValue(new Error(errorMessage));
 
     const card: CreateCardRequest = {
       question: "",
@@ -70,6 +55,18 @@ describe("CardService", () => {
       tag: "",
     };
 
-    await expect(CardService.createCard(card)).rejects.toThrow(errorMessage);
+    await expect(cardService.createCard(card)).rejects.toThrow(errorMessage);
   });
+
+  it("should be called with the correct filter", async () => {
+
+    const filter : ListCardRequest = {
+      tag: ["testing"]
+    }
+
+    await cardService.getAllCards(filter);
+    expect(cardRepository.listCards).toHaveBeenCalledWith(filter);
+ 
+  });
+
 });

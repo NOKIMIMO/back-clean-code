@@ -1,8 +1,8 @@
-export interface getQuizzOfDateRequest {
+export interface GetQuizzOfDateRequest {
     date?: Date
 }
 
-export interface answerQuizzRequest {
+export interface AnswerQuizzRequest {
     isValid: boolean
     cardId: string
 }

@@ -1,3 +1,4 @@
+import { CardUpdateAction } from "../../domain/enum/card-update.enum"
 import { Category } from "../../domain/type/category.type"
 
 export interface CreateCardRequest {
@@ -16,4 +17,9 @@ export interface CardResponse {
     question: string
     answer: string
     tag: string
+}
+
+export interface UpdateCard {
+    id: string
+    category: CardUpdateAction
 }
