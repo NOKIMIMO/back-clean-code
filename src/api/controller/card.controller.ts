@@ -8,7 +8,7 @@ export class CardController {
 
   async getAllCards(req: Request, res: Response): Promise<void> {
     try {
-      const cards = await this.cardService.getAllCards(req.body);
+      const cards = await this.cardService.getAllCards(req.query);
       res.status(200).json(cards);
     } catch (error) {
       console.error(error);

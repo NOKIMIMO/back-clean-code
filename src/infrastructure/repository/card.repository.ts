@@ -16,7 +16,8 @@ export class CardRepository{
             '*'
         ])
         if(filter.tag){
-            query.where("cards.tag IN (:...tag)",{tag:filter.tag})
+            query.where("cards.tag = :tag", { tag: filter.tag })
+
         }
         return await query.getRawMany()
     }
@@ -58,7 +59,7 @@ export class CardRepository{
 
     async createCard(cardData: CreateCardRequest): Promise<CardDAO> {
         const CardRepository = this.db.getRepository(CardDAO)
-        const newCard = CardRepository.create({...cardData})
+        const newCard = CardRepository.create({...cardData, category: Category.FIRST})
         return await CardRepository.save(newCard)
     }
 }

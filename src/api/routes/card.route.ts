@@ -2,7 +2,7 @@ import { Router } from "express";
 import { CardController } from "../controller/card.controller";
 import { LearningController } from "../controller/learning.controller";
 import { validatorMiddleware } from "../middleware/body-validator.middleware";
-import { createCardBodyValidator } from "../validators/card.validator"
+import { createCardBodyValidator, listCardQuerryValidator } from "../validators/card.validator"
 import { answerQuizzBodyValidator, answerQuizzParamValidator, getQuizzOfDateQuerryValidator } from "../validators/learning.validator";
 
 export function cardRoutes(
@@ -11,7 +11,9 @@ export function cardRoutes(
   ): Router {
     const router = Router();
   
-    router.get("/", cardController.getAllCards.bind(cardController));
+    router.get("/", 
+        validatorMiddleware({ body: listCardQuerryValidator }),
+        cardController.getAllCards.bind(cardController));
   
     router.post(
       "/",
