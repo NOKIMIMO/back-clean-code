@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import { CardService } from "../../domain/service/card.service";
+import { injectable, inject } from "inversify";
 
+@injectable()
 export class CardController {
-  constructor(private cardService: CardService) {}
+  constructor(@inject(CardService) private cardService: CardService) {}
 
   async getAllCards(req: Request, res: Response): Promise<void> {
     try {

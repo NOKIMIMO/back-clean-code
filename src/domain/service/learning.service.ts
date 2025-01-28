@@ -1,12 +1,14 @@
+import { inject, injectable } from "inversify";
 import { UpdateCard } from "../../api/dto/card.dto";
 import { AnswerQuizzRequest } from "../../api/dto/learning.dto";
 import { CardRepository } from "../../infrastructure/repository/card.repository";
 import { CardUpdateAction } from "../enum/card-update.enum";
 import { Card } from "../type/card.type";
 
+@injectable()
 export class LearningService {
 
-    constructor(private cardRepository: CardRepository) {}
+    constructor(@inject(CardRepository) private cardRepository: CardRepository) {}
 
     async getTodayQuizz(date?: Date): Promise<Card[]> {
         const cards: Card[] = [];

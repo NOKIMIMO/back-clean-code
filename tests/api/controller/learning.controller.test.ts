@@ -1,5 +1,5 @@
 import { app } from "../../../src";
-import { answerQuizzRequest } from "../../../src/api/dto/learning.dto";
+import { AnswerQuizzRequest } from "../../../src/api/dto/learning.dto";
 import request from "supertest";
 
 const mockLearningService = {
@@ -14,11 +14,11 @@ jest.mock("../../../src/domain/service/learning.service", () => {
 });
 
 describe("answerCard", () => {
-  const validAndRightAnswerData: answerQuizzRequest = {
+  const validAndRightAnswerData: AnswerQuizzRequest = {
     cardId: "1",
     isValid: true,
   };
-  const validButWrongAnswerData: answerQuizzRequest = {
+  const validButWrongAnswerData: AnswerQuizzRequest = {
     cardId: "1",
     isValid: false,
   };

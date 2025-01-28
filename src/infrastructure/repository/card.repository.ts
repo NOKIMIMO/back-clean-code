@@ -1,14 +1,14 @@
 import { DataSource } from "typeorm";
 import { CardDAO } from "../dao/card.dao";
 import { CreateCardRequest, ListCardRequest, UpdateCard } from "../../api/dto/card.dto";
-import { Card } from "../../domain/type/card.type";
 import { GetQuizzOfDateRequest } from "../../api/dto/learning.dto";
 import { Category } from "../../domain/type/category.type";
 import { CardNotFoundError } from "../../common/errors/card-not-found-error.error";
+import { injectable, inject } from "inversify";
 
-
+@injectable()
 export class CardRepository{
-    constructor(private readonly db:DataSource) {}
+    constructor(@inject(DataSource) private readonly db: DataSource) {}
 
     async listCards(filter:ListCardRequest): Promise<CardDAO[]> {
         const query = this.db.createQueryBuilder(CardDAO,"cards")

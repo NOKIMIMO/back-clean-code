@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import { LearningService } from "../../domain/service/learning.service";
 import { CardNotFoundError } from "../../common/errors/card-not-found-error.error";
+import { inject, injectable } from "inversify";
 
+@injectable()
 export class LearningController {
-  constructor(private learningService: LearningService) {}
+  constructor(@inject(LearningService) private learningService: LearningService) {}
 
   async getTodayQuizz (
     req: Request,

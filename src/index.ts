@@ -1,20 +1,23 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import { routes } from "./api/routes/routes";
 
-const app = express();
-
 const main = async () => {
+  const app = express();
   const port = 3000;
 
-  app.use(express.json());
+  try {
 
-  routes(app);
+    app.use(express.json());
 
-  app.listen(port, () => {
-    console.log(`Serveur démarré sur http://localhost:${port}`);
-  });
+    routes(app);
+
+    app.listen(port, () => {
+      console.log(`Server started on http://localhost:${port}`);
+    });
+  } catch (error) {
+    console.log("Error starting the application:", error);
+    process.exit(1);
+  }
 };
-
-export { app };
 
 main();

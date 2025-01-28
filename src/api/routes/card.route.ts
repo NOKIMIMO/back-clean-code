@@ -1,17 +1,35 @@
 import { Router } from "express";
-import { createCardRequest, getAllCards } from "../controller/card.controller";
-import { getTodayQuizz, answerCard } from "../controller/learning.controller";
+import { CardController } from "../controller/card.controller";
+import { LearningController } from "../controller/learning.controller";
 import { validatorMiddleware } from "../middleware/body-validator.middleware";
 import { createCardBodyValidator } from "../validators/card.validator"
 import { answerQuizzBodyValidator, answerQuizzParamValidator, getQuizzOfDateQuerryValidator } from "../validators/learning.validator";
-const router = Router(); 
 
-router.get("/", getAllCards);
-
-router.post("/",validatorMiddleware({body: createCardBodyValidator}),createCardRequest);
-
-router.get("/quizz", validatorMiddleware({query: getQuizzOfDateQuerryValidator}), getTodayQuizz);
-
-router.patch("/:idCard/answer", validatorMiddleware({params: answerQuizzBodyValidator, body: answerQuizzParamValidator}), answerCard);
-
-export default router; 
+export function cardRoutes(
+    cardController: CardController,
+    learningController: LearningController
+  ): Router {
+    const router = Router();
+  
+    router.get("/", cardController.getAllCards.bind(cardController));
+  
+    router.post(
+      "/",
+      validatorMiddleware({ body: createCardBodyValidator }),
+      cardController.createCardRequest.bind(cardController)
+    );
+  
+    router.get(
+      "/quizz",
+      validatorMiddleware({ query: getQuizzOfDateQuerryValidator }),
+      learningController.getTodayQuizz.bind(learningController)
+    );
+  
+    router.patch(
+      "/:idCard/answer",
+      validatorMiddleware({ params: answerQuizzParamValidator, body: answerQuizzBodyValidator }),
+      learningController.answerCard.bind(learningController)
+    );
+  
+    return router;
+  }
