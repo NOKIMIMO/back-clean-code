@@ -1,9 +1,18 @@
 import { DataSource } from 'typeorm';
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config();
 
 const isProduction = process.env.NODE_ENV === 'production';
+
+console.log('isProduction:', isProduction);
+
+const entityPath = isProduction
+  ? 'dist/infrastructure/dao/*.dao.{ts,js}'
+  : 'src/infrastructure/dao/*.dao.{ts,js}'
+
+console.log('entityPath:', entityPath);
 
 export const database = new DataSource({
   type: isProduction ? 'mysql' : 'postgres',
@@ -13,8 +22,8 @@ export const database = new DataSource({
   password: isProduction ? process.env.DB_PASSWORD_PROD : process.env.DB_PASSWORD_DEV,
   database: isProduction ? process.env.DB_DATABASE_PROD : process.env.DB_DATABASE_DEV,
   synchronize: true,
-  logging: false,
-  entities: [__dirname + '/src/domain/type/*.entity.{ts,js}'],
+  logging: true,
+  entities: [entityPath],  // Dynamically use the correct path
 });
 
 export default database;

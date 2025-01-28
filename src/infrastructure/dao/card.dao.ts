@@ -18,4 +18,10 @@ export class CardDAO {
 
     @Column({ nullable: true })
     tag!: string;
+
+    @CreateDateColumn()
+    createdAt!: Date;
+
+    @UpdateDateColumn()
+    updatedAt!: Date;
 }
