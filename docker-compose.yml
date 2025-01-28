@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  pgsql-db:
+    image: postgres
+    environment:
+      POSTGRES_USER: ${DB_USER_DEV}
+      POSTGRES_PASSWORD: ${DB_PASSWORD_DEV}
+      POSTGRES_DB: ${DB_DATABASE_DEV}
+    env_file:
+      - .env  # Load other variables from .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgsql-data:/var/lib/postgresql/data
+    restart: unless-stopped
+volumes:
+  pgsql-data:
+    driver: local

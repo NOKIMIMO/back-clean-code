@@ -22,7 +22,7 @@ export const database = new DataSource({
   password: isProduction ? process.env.DB_PASSWORD_PROD : process.env.DB_PASSWORD_DEV,
   database: isProduction ? process.env.DB_DATABASE_PROD : process.env.DB_DATABASE_DEV,
   synchronize: true,
-  logging: true,
+  logging: false,
   entities: [entityPath],  // Dynamically use the correct path
 });
 
