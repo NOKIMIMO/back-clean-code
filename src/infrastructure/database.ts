@@ -17,7 +17,7 @@ console.log('entityPath:', entityPath);
 export const database = new DataSource({
   type: isProduction ? 'mysql' : 'postgres',
   host: isProduction ? process.env.DB_HOST_PROD : process.env.DB_HOST_DEV,
-  port: isProduction ? 3306 : 5432,
+  port: isProduction ? 3306 : +process.env.DB_PORT_DEV!,
   username: isProduction ? process.env.DB_USER_PROD : process.env.DB_USER_DEV,
   password: isProduction ? process.env.DB_PASSWORD_PROD : process.env.DB_PASSWORD_DEV,
   database: isProduction ? process.env.DB_DATABASE_PROD : process.env.DB_DATABASE_DEV,
