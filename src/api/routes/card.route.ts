@@ -28,7 +28,7 @@ export function cardRoutes(
     );
   
     router.patch(
-      "/:idCard/answer",
+      "/:cardId/answer",
       validatorMiddleware({ params: answerQuizzParamValidator, body: answerQuizzBodyValidator }),
       learningController.answerCard.bind(learningController)
     );

@@ -26,7 +26,7 @@ export class LearningController {
     res: Response,
   ): Promise<void> {
     try {
-      const cards = await this.learningService.answerCard(req.body);
+      const cards = await this.learningService.answerCard({isValid: req.body.isValid, cardId: req.params.cardId});
       res.status(200).json(cards);
     } catch(error){
       if(error instanceof CardNotFoundError){
