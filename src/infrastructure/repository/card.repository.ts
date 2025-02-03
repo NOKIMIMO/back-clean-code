@@ -5,6 +5,7 @@ import { GetQuizzOfDateRequest } from "../../api/dto/learning.dto";
 import { Category } from "../../domain/type/category.type";
 import { CardNotFoundError } from "../../common/errors/card-not-found-error.error";
 import { injectable, inject } from "inversify";
+import { CardUpdateAction } from "../../domain/enum/card-update.enum";
 
 @injectable()
 export class CardRepository{
@@ -33,10 +34,10 @@ export class CardRepository{
         if (!cardToUpdate) {
             throw new CardNotFoundError("No card found")
         }
-        if (card.category === "INCREMENT") {
+        if (card.category === CardUpdateAction.INCREMENT) {
             cardToUpdate.category = cardToUpdate.category + 1
         }
-        if (card.category === "RESET") {
+        if (card.category === CardUpdateAction.RESET) {
             cardToUpdate.category = Category.FIRST
         }
         return await CardRepository.save(cardToUpdate)
