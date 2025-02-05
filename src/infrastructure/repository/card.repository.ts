@@ -58,6 +58,17 @@ export class CardRepository{
         return card;
     }
 
+    async getCardsForQuizz(getQuizzOfDateRequest: GetQuizzOfDateRequest): Promise<CardDAO[]> {
+        const CardRepository = this.db.getRepository(CardDAO)
+        const query = CardRepository.createQueryBuilder("cards")
+        if (getQuizzOfDateRequest.date) {
+            query.where("cards.createdAt >= :date", { date: getQuizzOfDateRequest.date })
+        }
+        return await query
+        .orderBy("ASC")
+        .getMany();
+    }
+
     async createCard(cardData: CreateCardRequest): Promise<CardDAO> {
         const CardRepository = this.db.getRepository(CardDAO)
         const newCard = CardRepository.create({...cardData, category: Category.FIRST})

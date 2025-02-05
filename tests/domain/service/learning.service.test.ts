@@ -10,7 +10,7 @@ describe("LearningService", () => {
       createCard: jest.fn(),
       listCards: jest.fn(),
     } as unknown as jest.Mocked<CardRepository>;
-    learningService = new LearningService();
+    learningService = new LearningService(cardRepository);
   });
 
   describe("getTodayQuizz", () => {

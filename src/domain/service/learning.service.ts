@@ -11,8 +11,12 @@ export class LearningService {
     constructor(@inject(CardRepository) private cardRepository: CardRepository) {}
 
     async getTodayQuizz(date?: Date): Promise<Card[]> {
-        const cards: Card[] = [];
-        return cards;
+        if(!date){
+            date = new Date();
+        }
+        return await this.cardRepository.getCardsForQuizz({date: date});
+
+
     }
 
     async answerCard(data: AnswerQuizzRequest): Promise<Card> {
