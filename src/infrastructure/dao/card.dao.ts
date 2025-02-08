@@ -19,6 +19,12 @@ export class CardDAO {
     @Column({ nullable: true })
     tag!: string;
 
+    @Column({ nullable: false })
+    nextAnswerDate!: Date;
+
+    @Column({ nullable: true })
+    lastAnswerDate!: Date;
+
     @CreateDateColumn()
     createdAt!: Date;
 

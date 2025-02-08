@@ -16,8 +16,9 @@ export class LearningController {
       const date = req.query.date ? new Date(req.query.date as string) : undefined;
 
       const card = await this.learningService.getTodayQuizz(date);
-      const cardResponse: CardResponse = { ...card, tag: card.tag || "" };
-
+      const cardResponse: CardResponse[] = card.map((card) => {
+        return { ...card, tag: card.tag || "" };
+      });
       res.status(200).json(cardResponse);
     } catch (error) {
       console.error(error);

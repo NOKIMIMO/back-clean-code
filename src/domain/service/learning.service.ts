@@ -10,7 +10,7 @@ export class LearningService {
 
     constructor(@inject(CardRepository) private cardRepository: CardRepository) {}
 
-    async getTodayQuizz(date?: Date): Promise<Card> {
+    async getTodayQuizz(date?: Date): Promise<Card[]> {
         if(!date){
             date = new Date();
         }

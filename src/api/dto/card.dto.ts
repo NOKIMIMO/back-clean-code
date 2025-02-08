@@ -14,6 +14,8 @@ export interface ListCardRequest {
 export interface CardResponse {
     id: string
     category: Category
+    nextAnswerDate: Date
+    lastAnswerDate: Date
     question: string
     answer: string
     tag: string

@@ -34,40 +34,51 @@ export class CardRepository{
         if (!cardToUpdate) {
             throw new CardNotFoundError("No card found")
         }
+        cardToUpdate.lastAnswerDate = new Date()
         if (card.category === CardUpdateAction.INCREMENT) {
             cardToUpdate.category = cardToUpdate.category + 1
+            // leitner system
+            const addedDays = Math.pow(2, cardToUpdate.category)
+            cardToUpdate.nextAnswerDate = new Date()
+            cardToUpdate.nextAnswerDate.setDate(cardToUpdate.nextAnswerDate.getDate() + addedDays)
         }
         if (card.category === CardUpdateAction.RESET) {
             cardToUpdate.category = Category.FIRST
+            cardToUpdate.nextAnswerDate = new Date()
+            cardToUpdate.nextAnswerDate.setDate(cardToUpdate.nextAnswerDate.getDate() + 1)
         }
         return await CardRepository.save(cardToUpdate)
     }
 
-    async getRandCard(getQuizzOfDateRequest: GetQuizzOfDateRequest): Promise<CardDAO> {
+    async getCardForQuizz(getQuizzOfDateRequest: GetQuizzOfDateRequest): Promise<CardDAO[]> {
         const CardRepository = this.db.getRepository(CardDAO)
         const query = CardRepository.createQueryBuilder("cards")
-        if (getQuizzOfDateRequest.date) {
-            query.where("cards.createdAt >= :date", { date: getQuizzOfDateRequest.date })
-        }
-        const card = await query
-        .orderBy("RANDOM()")
-        .getOne();
-        if (!card) {
-            throw new Error("No card found");
-        }
-        return card;
-    }
+            .where("cards.category != :category", { category: Category.DONE });
 
-    async getCardForQuizz(getQuizzOfDateRequest: GetQuizzOfDateRequest): Promise<CardDAO> {
-        const CardRepository = this.db.getRepository(CardDAO)
-        const query = CardRepository.createQueryBuilder("cards")
+        let dateMin: Date;
+        let dateMax: Date;
+
         if (getQuizzOfDateRequest.date) {
-            query.where("cards.createdAt >= :date", { date: getQuizzOfDateRequest.date })
+            dateMin = new Date(getQuizzOfDateRequest.date);
+            dateMin.setHours(0, 0, 0, 0);
+
+            dateMax = new Date(getQuizzOfDateRequest.date);
+            dateMax.setDate(dateMax.getDate() + 1);
+            dateMax.setHours(0, 0, 0, 0);
+        } else {
+            dateMin = new Date();
+            dateMin.setHours(0, 0, 0, 0);
+
+            dateMax = new Date();
+            dateMax.setDate(dateMax.getDate() + 1);
+            dateMax.setHours(0, 0, 0, 0);
         }
+
+        query.andWhere("cards.nextAnswerDate <= :dateMax", { dateMax })
+            .andWhere("cards.nextAnswerDate >= :dateMin", { dateMin });
         const card = await query
         .orderBy("cards.createdAt", "ASC")
-        .limit(1)
-        .getOne();
+        .getMany();
         if (!card) {
             throw new Error("No card found");
         }
@@ -77,7 +88,9 @@ export class CardRepository{
 
     async createCard(cardData: CreateCardRequest): Promise<CardDAO> {
         const CardRepository = this.db.getRepository(CardDAO)
-        const newCard = CardRepository.create({...cardData, category: Category.FIRST})
+        const nextAnswerDate = new Date();
+        nextAnswerDate.setDate(nextAnswerDate.getDate() + 1);
+        const newCard = CardRepository.create({...cardData, category: Category.FIRST, nextAnswerDate: nextAnswerDate})
         return await CardRepository.save(newCard)
     }
 }

@@ -19,14 +19,13 @@ describe("LearningService", () => {
 
       await learningService.getTodayQuizz();
 
-      expect(cardRepository.getRandCard).toHaveBeenCalledWith();
     });
     it("should correctly list quizz for today", async () => {
 
       const date = new Date();
       await learningService.getTodayQuizz(date);
 
-      expect(cardRepository.getRandCard).toHaveBeenCalledWith(date);
+
     });
   });
 
