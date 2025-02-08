@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { LearningService } from "../../domain/service/learning.service";
 import { CardNotFoundError } from "../../common/errors/card-not-found-error.error";
 import { inject, injectable } from "inversify";
+import { CardResponse } from "../dto/card.dto";
 
 @injectable()
 export class LearningController {
@@ -12,9 +13,12 @@ export class LearningController {
     res: Response,
   ): Promise<void> {
     try {
-      const date = req.body.date;
-      const quizz = await this.learningService.getTodayQuizz(date);
-      res.status(200).json(quizz);
+      const date = req.query.date ? new Date(req.query.date as string) : undefined;
+
+      const card = await this.learningService.getTodayQuizz(date);
+      const cardResponse: CardResponse = { ...card, tag: card.tag || "" };
+
+      res.status(200).json(cardResponse);
     } catch (error) {
       console.error(error);
       res.status(400).json({ error: "Bad request" });
@@ -32,7 +36,7 @@ export class LearningController {
       if(error instanceof CardNotFoundError){
         console.error(error);
         res.status(400).json({ error: "Card not found" });
-      }else{                   /////////////////////////////////////////////////////////// add error from middleware
+      }else{                   ///////////////////////////////////////////////////////////TODO! add error from middleware
         console.error(error);
         res.status(400).json({ error: "Bad request" });
       }

@@ -22,7 +22,7 @@ export function cardRoutes(
     );
   
     router.get(
-      "/quizz",
+      "/quiz",
       validatorMiddleware({ query: getQuizzOfDateQuerryValidator }),
       learningController.getTodayQuizz.bind(learningController)
     );
