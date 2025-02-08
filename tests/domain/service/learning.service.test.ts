@@ -2,6 +2,8 @@ import { AnswerQuizzRequest } from '../../../src/api/dto/learning.dto';
 import {LearningService} from '../../../src/domain/service/learning.service';
 import { CardRepository } from '../../../src/infrastructure/repository/card.repository';
 
+
+//à refaire entièremennt ngl
 describe("LearningService", () => {
   let learningService: LearningService;
   let cardRepository: jest.Mocked<CardRepository>;
@@ -14,7 +16,7 @@ describe("LearningService", () => {
   });
 
   describe("getTodayQuizz", () => {
-    it("should correctly list quizz for today", async () => {
+    it("should correctly list quizz for today without specifying the date", async () => {
 
 
       await learningService.getTodayQuizz();

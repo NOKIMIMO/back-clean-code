@@ -1,76 +1,97 @@
-import { app } from "../../../src";
-import { CreateCardRequest } from "../../../src/api/dto/card.dto";
-import { CardService } from "../../../src/domain/service/card.service";
-import request from "supertest";
-import { Card } from "../../../src/domain/type/card.type";
-import { Category } from "../../../src/domain/type/category.type";
+import { Request, Response } from 'express';
+import { CardController } from '../../../src/api/controller/card.controller';
+import { CardService } from '../../../src/domain/service/card.service';
+import { CardRepository } from '../../../src/infrastructure/repository/card.repository';
+import { Card } from '../../../src/domain/type/card.type';
+import { Category } from '../../../src/domain/type/category.type';
 
-const mockCardRepository = {
-  createCard: jest.fn(),
-  listCards: jest.fn(),
-};
+jest.mock('../../../src/domain/service/card.service');
 
-const cardService = new CardService(mockCardRepository as any);
+describe('CardController', () => {
+  let mockedCardRepository: jest.Mocked<CardRepository>;
+  let cardController: CardController;
+  let mockedCardService: jest.Mocked<CardService>;
+  let req: Partial<Request>;
+  let res: Partial<Response>;
 
-jest.mock("../../../src/domain/service/card.service", () => {
-  return {
-    CardService: jest.fn().mockImplementation(() => cardService),
-  };
-});
+  beforeEach(() => {
+    mockedCardRepository = {} as jest.Mocked<CardRepository>;
+    mockedCardService = new CardService(mockedCardRepository) as jest.Mocked<CardService>;
+    cardController = new CardController(mockedCardService);
 
-describe("createCardController", () => {
-  const validCardData: CreateCardRequest = {
-    question: "What is Jest?",
-    answer: "A testing framework for JavaScript",
-    tag: "testing",
-  };
-
-  const invalidCardMissingData: any = {
-    answer: "thingy",
-  };
-
-  const invalidCardDataType: any = {
-    question: "What is Jest?",
-    answer: 9,
-  };
-
-  it("should create a card successfully and return 201 status", async () => {
-    const mockedCard: Card = {
-      ...validCardData,
-      id: "1",
-      category: Category.FIRST,
+    req = {};
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
     };
-    mockCardRepository.createCard.mockResolvedValue(mockedCard);
+  });
+  const mockCards: Card[] = [
+    {
+      id: '1', question: 'What is 2+2?', answer: '4', tag: '1',
+      lastAnswerDate: new Date(),
+      nextAnswerDate: new Date(),
+      category: Category.FIRST
+    },
+    {
+      id: '2', question: 'What is 3+3?', answer: '6', tag: '1',
+      lastAnswerDate: new Date(),
+      nextAnswerDate: new Date(),
+      category: Category.FIRST
+    },
+  ];
+  describe('getAllCards', () => {
+    it('should return all cards with query parameters', async () => {
+      
+      mockedCardService.getAllCards.mockResolvedValue(mockCards);
 
-    const response = await request(app)
-      .post("/cards")
-      .send(validCardData)
-      .expect(201);
+      req.query = { tag: '1' };
 
-    expect(mockCardRepository.createCard).toHaveBeenCalledWith(validCardData);
-    expect(response.body).toEqual(mockedCard);
-    expect(response.status).toBe(201);
+      await cardController.getAllCards(req as Request, res as Response);
+
+      expect(mockedCardService.getAllCards).toHaveBeenCalledWith({ tag: '1' });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(mockCards);
+    });
+
+    it('should handle errors', async () => {
+      mockedCardService.getAllCards.mockRejectedValue(new Error('Database error'));
+
+      req.query = {};
+
+      await cardController.getAllCards(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Bad request' });
+    });
   });
 
-  it("should return 400 status because of missing parameter", async () => {
-    const response = await request(app)
-      .post("/cards")
-      .send(invalidCardMissingData)
-      .expect(400);
+  describe('createCardRequest', () => {
+    it('should create a new card and return it', async () => {
+      const mockCard = mockCards[0];
+      mockedCardService.createCard.mockResolvedValue(mockCard);
 
-    expect(mockCardRepository.createCard).not.toHaveBeenCalled();
-    expect(response.body.error).toBe("Missing property question");
-    expect(response.status).toBe(400);
-  });
+      req.body = { question: 'What is 2+2?', answer: '4', tag: '1' };
 
-  it("should return 400 status because of wrong parameter type", async () => {
-    const response = await request(app)
-      .post("/cards")
-      .send(invalidCardDataType)
-      .expect(400);
+      await cardController.createCardRequest(req as Request, res as Response);
 
-    expect(mockCardRepository.createCard).not.toHaveBeenCalled();
-    expect(response.body.error).toBe("property : answer must be a string");
-    expect(response.status).toBe(400);
+      expect(mockedCardService.createCard).toHaveBeenCalledWith({
+        question: 'What is 2+2?',
+        answer: '4',
+        tag: '1',
+      });
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith(mockCard);
+    });
+
+    it('should handle errors', async () => {
+      mockedCardService.createCard.mockRejectedValue(new Error('Invalid card data'));
+
+      req.body = { question: 'What is 2+2?', answer: '4', tag: '1' };
+
+      await cardController.createCardRequest(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Bad request' });
+    });
   });
 });

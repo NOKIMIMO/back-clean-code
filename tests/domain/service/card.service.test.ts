@@ -3,6 +3,7 @@ import { CreateCardRequest, ListCardRequest } from "../../../src/api/dto/card.dt
 import { Card } from "../../../src/domain/type/card.type";
 import { Category } from "../../../src/domain/type/category.type";
 import { CardRepository } from "../../../src/infrastructure/repository/card.repository";
+import { CardDAO } from "../../../src/infrastructure/dao/card.dao";
 
 describe("CardService", () => {
   let cardService: CardService;
@@ -25,15 +26,19 @@ describe("CardService", () => {
       tag: "testing",
     };
 
-    const mockCard = {
+    const mockCard: CardDAO = {
       id: "1",
       question: cardRequest.question,
       answer: cardRequest.answer,
       tag: cardRequest.tag || "",
-      category: Category.FIRST
+      category: Category.FIRST,
+      lastAnswerDate: new Date(),
+      nextAnswerDate: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
-    cardRepository.createCard.mockResolvedValue({...mockCard});
+    cardRepository.createCard.mockResolvedValue(mockCard);
 
     const result = await cardService.createCard(cardRequest);
 

@@ -13,6 +13,9 @@ export class CardService {
     }
 
     async createCard(card: CreateCardRequest): Promise<Card> {
+        if(!card.question || !card.answer || !card.tag){
+            throw new Error("Invalid input");
+        }
         return await this.cardRepository.createCard(card);
     }
 

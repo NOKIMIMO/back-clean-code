@@ -11,7 +11,6 @@ export class CardController {
       const cards = await this.cardService.getAllCards(req.query);
       res.status(200).json(cards);
     } catch (error) {
-      console.error(error);
       res.status(400).json({ error: "Bad request" });
     }
   }
@@ -21,7 +20,6 @@ export class CardController {
       const createdCard = await this.cardService.createCard(req.body);
       res.status(201).json(createdCard);
     } catch (error) {
-      console.error(error);
       res.status(400).json({ error: "Bad request" });
     }
   }
