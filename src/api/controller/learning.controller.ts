@@ -13,7 +13,7 @@ export class LearningController {
     res: Response,
   ): Promise<void> {
     try {
-      const date = req.query.date ? new Date(req.query.date as string) : undefined;
+      const date = req.query.date ? new Date(req.query.date as string) : new Date();
 
       const card = await this.learningService.getTodayQuizz(date);
       const cardResponse: CardResponse[] = card.map((card) => {
