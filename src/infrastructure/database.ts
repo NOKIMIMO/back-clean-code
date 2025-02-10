@@ -1,6 +1,5 @@
 import { DataSource } from 'typeorm';
 import dotenv from 'dotenv';
-import path from 'path';
 
 dotenv.config();
 
@@ -23,7 +22,7 @@ export const database = new DataSource({
   database: isProduction ? process.env.DB_DATABASE_PROD : process.env.DB_DATABASE_DEV,
   synchronize: true,
   logging: false,
-  entities: [entityPath],  // Dynamically use the correct path
+  entities: [entityPath],
 });
 
 export default database;

@@ -7,6 +7,8 @@ import { CardNotFoundError } from "../../common/errors/card-not-found-error.erro
 import { injectable, inject } from "inversify";
 import { CardUpdateAction } from "../../domain/enum/card-update.enum";
 
+const LEITNER_FACTOR = 2;
+
 @injectable()
 export class CardRepository{
     constructor(@inject(DataSource) private readonly db: DataSource) {}
@@ -18,7 +20,6 @@ export class CardRepository{
         ])
         if(filter.tag){
             query.where("cards.tag = :tag", { tag: filter.tag })
-
         }
         return await query.getRawMany()
     }
@@ -28,62 +29,81 @@ export class CardRepository{
         return await CardRepository.findOneByOrFail({id: id})
     }
 
-    async updateCard(card: UpdateCard): Promise<CardDAO> {
-        const CardRepository = this.db.getRepository(CardDAO)
-        const cardToUpdate = await CardRepository.findOneBy({id: card.id})
+    private incrementCategory(cardToUpdate: CardDAO): CardDAO {
+        cardToUpdate.category = cardToUpdate.category + 1
+        const daysToAdd = Math.pow(LEITNER_FACTOR, cardToUpdate.category)
+        cardToUpdate.nextAnswerDate = new Date()
+        cardToUpdate.nextAnswerDate.setDate(cardToUpdate.nextAnswerDate.getDate() + daysToAdd)
+        return cardToUpdate;
+    }
+    private resetCategory(cardToUpdate: CardDAO): CardDAO {
+        cardToUpdate.category = Category.FIRST
+        cardToUpdate.nextAnswerDate = new Date()
+        cardToUpdate.nextAnswerDate.setDate(cardToUpdate.nextAnswerDate.getDate() + 1)
+        return cardToUpdate;
+    }
+
+    private computeCardUpdate(category: CardUpdateAction, cardToUpdate: CardDAO | null): CardDAO  {
         if (!cardToUpdate) {
             throw new CardNotFoundError("No card found")
         }
         cardToUpdate.lastAnswerDate = new Date()
-        if (card.category === CardUpdateAction.INCREMENT) {
-            cardToUpdate.category = cardToUpdate.category + 1
-            // leitner system
-            const addedDays = Math.pow(2, cardToUpdate.category)
-            cardToUpdate.nextAnswerDate = new Date()
-            cardToUpdate.nextAnswerDate.setDate(cardToUpdate.nextAnswerDate.getDate() + addedDays)
+        if (category === CardUpdateAction.INCREMENT) {
+            cardToUpdate = this.incrementCategory(cardToUpdate)
         }
-        if (card.category === CardUpdateAction.RESET) {
-            cardToUpdate.category = Category.FIRST
-            cardToUpdate.nextAnswerDate = new Date()
-            cardToUpdate.nextAnswerDate.setDate(cardToUpdate.nextAnswerDate.getDate() + 1)
+        if (category === CardUpdateAction.RESET) {
+            cardToUpdate = this.resetCategory(cardToUpdate)
         }
+        return cardToUpdate;
+    }
+
+    async updateCard(card: UpdateCard): Promise<CardDAO> {
+        const CardRepository = this.db.getRepository(CardDAO)
+        let cardToUpdate = await CardRepository.findOneBy({id: card.id})
+        cardToUpdate = this.computeCardUpdate(card.category, cardToUpdate);
         return await CardRepository.save(cardToUpdate)
+    }
+
+    private getMinDate(requestedDate?: Date): Date {
+        let dateMin: Date;
+        if(requestedDate){
+            dateMin = new Date(requestedDate);
+        } else {
+            dateMin = new Date();
+        }
+        dateMin.setHours(0, 0, 0, 0);
+        return dateMin;
+    }
+
+    private getMaxDate(requestedDate?: Date): Date {
+        let dateMax: Date;
+        if(requestedDate){
+            dateMax = new Date(requestedDate.getDate() + 1);
+        } else {
+            dateMax = new Date();
+            dateMax.setDate(dateMax.getDate() + 1);
+        }
+        dateMax.setHours(0, 0, 0, 0);
+        return dateMax;
     }
 
     async getCardForQuizz(getQuizzOfDateRequest: GetQuizzOfDateRequest): Promise<CardDAO[]> {
         const CardRepository = this.db.getRepository(CardDAO)
         const query = CardRepository.createQueryBuilder("cards")
             .where("cards.category != :category", { category: Category.DONE });
-
-        let dateMin: Date;
-        let dateMax: Date;
-
-        if (getQuizzOfDateRequest.date) {
-            dateMin = new Date(getQuizzOfDateRequest.date);
-            dateMin.setHours(0, 0, 0, 0);
-
-            dateMax = new Date(getQuizzOfDateRequest.date);
-            dateMax.setDate(dateMax.getDate() + 1);
-            dateMax.setHours(0, 0, 0, 0);
-        } else {
-            dateMin = new Date();
-            dateMin.setHours(0, 0, 0, 0);
-
-            dateMax = new Date();
-            dateMax.setDate(dateMax.getDate() + 1);
-            dateMax.setHours(0, 0, 0, 0);
-        }
-
+        
+        let dateMin: Date = this.getMinDate(getQuizzOfDateRequest.date);
+        let dateMax: Date = this.getMaxDate(getQuizzOfDateRequest.date);
+        
         query.andWhere("cards.nextAnswerDate <= :dateMax", { dateMax })
             .andWhere("cards.nextAnswerDate >= :dateMin", { dateMin });
         const card = await query
-        .orderBy("cards.createdAt", "ASC")
-        .getMany();
+            .orderBy("cards.createdAt", "ASC")
+            .getMany();
         if (!card) {
             throw new Error("No card found");
         }
         return card;
-
     }
 
     async createCard(cardData: CreateCardRequest): Promise<CardDAO> {
