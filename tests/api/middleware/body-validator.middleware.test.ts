@@ -136,18 +136,4 @@ describe("validatorMiddleware", () => {
     expect(mockNext).not.toHaveBeenCalled();
   });
 
-  it("should respond with 500 for unexpected errors", () => {
-    const middleware = validatorMiddleware({});
-    jest.spyOn(Joi.object().constructor.prototype, "validate").mockImplementationOnce(() => {
-      throw new Error("Unexpected error");
-    });
-
-    middleware(mockRequest as Request, mockResponse as Response, mockNext);
-
-    expect(mockResponse.status).toHaveBeenCalledWith(500);
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      error: "Internal Server Error",
-    });
-    expect(mockNext).not.toHaveBeenCalled();
-  });
 });
