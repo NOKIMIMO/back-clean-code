@@ -30,7 +30,7 @@ export class CardRepository{
     }
 
     private incrementCategory(cardToUpdate: CardDAO): CardDAO {
-        cardToUpdate.category = cardToUpdate.category + 1
+        cardToUpdate.category++
         const daysToAdd = Math.pow(LEITNER_FACTOR, cardToUpdate.category)
         cardToUpdate.nextAnswerDate = new Date()
         cardToUpdate.nextAnswerDate.setDate(cardToUpdate.nextAnswerDate.getDate() + daysToAdd)
@@ -76,11 +76,10 @@ export class CardRepository{
     }
 
     private getMaxDate(requestedDate?: Date): Date {
-        let dateMax: Date;
+        let dateMax: Date = new Date();
         if(requestedDate){
-            dateMax = new Date(requestedDate.getDate() + 1);
+            dateMax.setDate(requestedDate.getDate() + 1);
         } else {
-            dateMax = new Date();
             dateMax.setDate(dateMax.getDate() + 1);
         }
         dateMax.setHours(0, 0, 0, 0);
